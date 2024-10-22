@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>CSS Extractor</title>
+</head>
+<body>
+    <h2>CSS Extractor</h2>
+    
+    <div class="css-box">
+        <pre id="output" class="output">Select any layer to generate CSS</pre>
+        <button id="copy-css" class="hidden">Copy to Clipboard</button>
+        <p id="confirmation" class="confirmation hidden">Copied!</p> <!-- Confirmation message -->
+    </div>
+
+    <script>
+        // Listen for messages from the plugin code
+        onmessage = (event) => {
+            const { type, css } = event.data.pluginMessage;
+
+            if (type === 'css-output') {
+                document.getElementById('output').innerHTML = formatCSS(css);
+                document.getElementById('copy-css').classList.remove('hidden');
+            }
+        };
+
+        // Function to format and colorize CSS output
+        function formatCSS(css) {
+            return css.split('\n').map(line => {
+                if (line.trim().endsWith('{')) {
+                    return `<span style="color: #007acc;">${line}</span>`;
+                } else if (line.includes(':')) {
+                    const [property, value] = line.split(':');
+                    return `<span style="color: #007acc;">${property.trim()}:</span> <span style="color: #d14;">${value.trim()};</span>`;
+                }
+                return line;
+            }).join('<br>');
+        }
+
+        // Copy CSS and show confirmation message
+        document.getElementById('copy-css').onclick = () => {
+            const output = document.getElementById('output').textContent; // Use textContent for plain text
+
+            navigator.clipboard.writeText(output).then(() => {
+                showConfirmation(); // Show confirmation
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy CSS.');
+            });
+        };
+
+        // Function to show confirmation message
+        function showConfirmation() {
+            const confirmationMsg = document.getElementById('confirmation');
+            const copyButton = document.getElementById('copy-css');
+
+            // Show confirmation and change button text
+            confirmationMsg.classList.remove('hidden');
+            copyButton.textContent = 'Copied!';
+
+            // Reset the button and message after 2 seconds
+            setTimeout(() => {
+                confirmationMsg.classList.add('hidden');
+                copyButton.textContent = 'Copy to Clipboard';
+            }, 2000);
+        }
+
+        // Trigger CSS request from plugin
+        parent.postMessage({ pluginMessage: { type: 'get-css' } }, '*');
+    </script>
+</body>
+</html>

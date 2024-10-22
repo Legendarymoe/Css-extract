@@ -1,0 +1,9 @@
+{
+    "name": "Moe's CSS Extractor",
+    "id": "com.yourname.comprehensive-css-extractor",
+    "api": "1.0.0",
+    "main": "code.js",
+    "editorType": ["figma"],
+    "ui": "ui.html"
+  }
+  
